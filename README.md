@@ -1,0 +1,1 @@
+to run the webapp -> streamlit run ./frontend/app.py
