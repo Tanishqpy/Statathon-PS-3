@@ -1,0 +1,11 @@
+streamlit
+pandas
+openpyxl
+scikit-learn
+fastapi
+uvicorn
+pdfkit
+jinja2
+openai
+python-multipart
+requests
