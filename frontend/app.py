@@ -131,7 +131,7 @@ else:
     st.sidebar.markdown("_No previous prompts yet._")
 
 # Spacing for aesthetics
-st.markdown("<br>" * 4, unsafe_allow_html=True)
+st.markdown("<br>" * 5, unsafe_allow_html=True)
 
 # File Upload
 uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=['csv', 'xlsx'])
