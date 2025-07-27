@@ -1,5 +1,10 @@
 import streamlit as st
 import pandas as pd
+import requests
+import json
+
+# --- CONFIG ---
+BACKEND_URL = "http://127.0.0.1:8000/process"
 
 # Page config
 st.set_page_config(page_title="AI File Assistant", layout="centered", initial_sidebar_state="auto")
@@ -113,6 +118,8 @@ st.markdown('<h1 class="modern-header">AI Report Making Assistant</h1>', unsafe_
 # Initialize session state for prompt history if not already present
 if "prompt_history" not in st.session_state:
     st.session_state.prompt_history = []
+if "active_prompt" not in st.session_state:
+    st.session_state.active_prompt = ""
 
 # Sidebar for accessing previous prompts
 st.sidebar.title("🧾 Prompt History")
@@ -124,52 +131,55 @@ else:
     st.sidebar.markdown("_No previous prompts yet._")
 
 # Spacing for aesthetics
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<br>" * 4, unsafe_allow_html=True)
 
 # File Upload
 uploaded_file = st.file_uploader("Upload a CSV or Excel file", type=['csv', 'xlsx'])
 
 # Spacing for aesthetics
-st.markdown("<br>", unsafe_allow_html=True)
-st.markdown("<br>", unsafe_allow_html=True)
+st.markdown("<br>" * 2, unsafe_allow_html=True)
 
 # Prompt Input
-prompt = st.text_area("Enter your prompt related to the uploaded file", placeholder="Type your prompt here...")
+prompt = st.text_area(
+    "Enter your prompt related to the uploaded file",
+    placeholder="Type your prompt here...",
+    key="active_prompt"
+)
 
 # Button to send the prompt
 if st.button("Submit Prompt"):
-    if not prompt:
+    if not uploaded_file:
+        st.error("Please upload a file before submitting.")
+    elif not prompt:
         st.error("Please enter a prompt before submitting.")
     else:
         # Add the prompt to the history
-        st.session_state.prompt_history.append(prompt)
-        st.success("Prompt submitted successfully! 🚀")
-        st.markdown("<br>", unsafe_allow_html=True)
+        if prompt not in st.session_state.prompt_history:
+            st.session_state.prompt_history.append(prompt)
 
-# If both file and prompt are provided
-if uploaded_file and prompt:
-    st.markdown('<div class="glow-box">', unsafe_allow_html=True)
+        with st.spinner("🚀 Sending data to the AI for processing..."):
+            try:
+                # Prepare payload for the backend
+                files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
+                data = {"prompt": prompt}
 
-    try:
-        # Read uploaded file
-        if uploaded_file.name.endswith('.csv'):
-            df = pd.read_csv(uploaded_file)
-        else:
-            df = pd.read_excel(uploaded_file)
+                # Send request to FastAPI backend
+                response = requests.post(BACKEND_URL, files=files, data=data)
 
-        # Show file preview
-        st.subheader("📄 File Preview:")
-        st.dataframe(df.head(), use_container_width=True)
+                if response.status_code == 200:
+                    st.success("Prompt submitted and processed successfully! 🚀")
+                    result = response.json()
 
-        # Show prompt
-        st.subheader("🧠 Prompt Response:")
-        st.markdown(f"**Your Prompt:** `{prompt}`")
-        st.markdown("🚧 *(You can implement prompt-based processing here)*")
+                    # Display the results in a glowing box
+                    st.markdown('<div class="glow-box">', unsafe_allow_html=True)
+                    st.subheader("🧠 AI Response:")
+                    st.json(result.get("summary", {}))
+                    st.markdown('</div>', unsafe_allow_html=True)
 
-    except Exception as e:
-        st.error(f"Error reading file: {e}")
-        
-    st.markdown('</div>', unsafe_allow_html=True)
+                else:
+                    st.error(f"Error from server: {response.status_code} - {response.text}")
+
+            except requests.exceptions.RequestException as e:
+                st.error(f"Failed to connect to the backend: {e}")
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
