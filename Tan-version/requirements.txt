@@ -1,0 +1,51 @@
+# Web framework and API
+streamlit
+fastapi>=0.95.0
+uvicorn>=0.21.1
+python-multipart>=0.0.6
+requests
+starlette>=0.26.1
+websockets>=11.0.2
+
+# Data processing
+pandas>=1.5.3
+numpy>=1.24.2
+openpyxl>=3.1.2
+scikit-learn>=1.2.2
+
+# Document generation
+pdfkit
+jinja2
+reportlab>=3.6.12
+
+# AI and ML
+openai
+transformers>=4.34.0
+torch>=2.0.0
+accelerate>=0.20.0
+
+# Optional GPU support
+# To enable GPU support, uncomment the following line:
+nvidia-cuda-runtime-cu11
+matplotlib>=3.7.1
+seaborn>=0.12.2
+
+# Data visualization
+plotly>=5.14.0
+kaleido>=0.2.1  # For static plotly image export
+nbformat>=5.7.0  # Required for plotly
+
+# Statistical analysis
+scipy>=1.10.1
+statsmodels>=0.13.5
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# API requests
+requests>=2.28.2
+
+# Excel support
+xlrd>=2.0.1
+openpyxl>=3.1.2
+xlsxwriter>=3.1.0
